@@ -1,0 +1,18 @@
+server:
+  port: 5000
+
+spring:
+  application:
+    name: bank_account_command
+  kafka:
+    bootstrap-servers: host.docker.internal:9092,host.docker.internal:9094,host.docker.internal:9096
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+  mongodb:
+    port: ${MONGODB_PORT:27017}
+    authentication-database: ${MONGODB_AUTH_SOURCE:admin}
+    password: ${MONGODB_PASSWORD:secret123}
+    username: ${MONGODB_USERNAME:admin}
+    database: ${MONGODB_DATABASE:bank_account}
+    host: ${MONGODB_HOST:localhost}
