@@ -1,5 +1,6 @@
 package org.kiroff.bank.account.command.api.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.kiroff.bank.account.command.api.commands.DepositFundsCommand;
 import org.kiroff.bank.account.command.api.commands.WithdrawFundsCommand;
 import org.kiroff.bank.account.common.dto.BaseResponse;
@@ -21,10 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
  * It processes incoming commands via the CommandDispatcher to ensure
  * changes are applied to the account state.
  */
+@Slf4j
 @RestController
 @RequestMapping(path = "/v1/funds")
 public class FundsController {
-    private final Logger logger = LoggerFactory.getLogger(FundsController.class);
 
     private final CommandDispatcher commandDispatcher;
 
@@ -76,11 +77,11 @@ public class FundsController {
             commandDispatcher.send(command);
             return new ResponseEntity<>(new BaseResponse("Funds " + action + " successfully"), HttpStatus.OK);
         } catch (IllegalStateException | AggregateNotFoundException ise) {
-            logger.error("Funds unsuccessfully {} [{}]", action, command.getId(), ise);
+            log.error("Funds unsuccessfully {} [{}]", action, command.getId(), ise);
             return ResponseEntity.badRequest().body(new BaseResponse(ise.toString()));
         } catch (Exception e) {
             String msg = String.format("Funds unsuccessfully %s [%s]", action, command.getId());
-            logger.error(msg, e);
+            log.error(msg, e);
             return new ResponseEntity<>(new BaseResponse(e.toString()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

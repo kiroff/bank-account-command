@@ -1,5 +1,6 @@
 package org.kiroff.bank.account.command.api.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.kiroff.bank.account.command.api.commands.CloseAccountCommand;
 import org.kiroff.bank.account.command.api.commands.OpenAccountCommand;
 import org.kiroff.bank.account.command.api.dto.OpenAccountResponse;
@@ -22,10 +23,10 @@ import java.util.UUID;
  * Controller class for managing bank accounts.
  * Handles API endpoints for account-related operations.
  */
+@Slf4j
 @RestController
 @RequestMapping(path = "/v1/accounts")
 public class AccountsController {
-    private final Logger logger = LoggerFactory.getLogger(AccountsController.class);
 
     private final CommandDispatcher commandDispatcher;
 
@@ -56,11 +57,11 @@ public class AccountsController {
             commandDispatcher.send(command);
             return new ResponseEntity<>(new OpenAccountResponse("Account opened successfully", id), HttpStatus.CREATED);
         } catch (IllegalStateException ise) {
-            logger.error("Failed to open account {}", id, ise);
+            log.error("Failed to open account {}", id, ise);
             return ResponseEntity.badRequest().body(new BaseResponse(ise.toString()));
         } catch (Exception e) {
             String msg = String.format("Failed to open account %s", id);
-            logger.error(msg, e);
+            log.error(msg, e);
             return new ResponseEntity<>(new OpenAccountResponse(e.toString()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -86,11 +87,11 @@ public class AccountsController {
             commandDispatcher.send(command);
             return new ResponseEntity<>(new BaseResponse("Account closed successfully"), HttpStatus.GONE);
         } catch (IllegalStateException ise) {
-            logger.error("Failed to close account {}", id, ise);
+            log.error("Failed to close account {}", id, ise);
             return ResponseEntity.badRequest().body(new BaseResponse(ise.toString()));
         } catch (Exception e) {
             String msg = String.format("Failed to close account %s", id);
-            logger.error(msg, e);
+            log.error(msg, e);
             return new ResponseEntity<>(new OpenAccountResponse(e.toString()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
