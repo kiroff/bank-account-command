@@ -37,8 +37,8 @@ public class AccountAggregate extends AggregateRoot {
         if (!this.active) {
             throw new IllegalStateException("Cannot deposit funds to a closed account");
         }
-        if (amount < 0) {
-            throw new IllegalStateException("Cannot deposit funds to a negative amount");
+        if (amount <= 0) {
+            throw new IllegalStateException("Cannot deposit funds with a non-positive amount");
         }
         raiseEvent(FundsDepositedEvent.builder()
                 .id(this.id)
