@@ -82,4 +82,15 @@ public class AccountEventStore implements EventStore {
                 .map(l -> l.stream().map(EventModel::getEventData).collect(Collectors.toList()))
                 .orElseThrow(() -> new AggregateNotFoundException("Incorrect id=" + aggregateId));
     }
+
+    @Override
+    public List<BaseEvent> getEventsForAllActiveAggregates() {
+        var aggregates = eventStoreRepository.findActiveAggregates();
+//        var aggregates = eventStoreRepository.findAll();
+
+        if(aggregates.isEmpty()) {
+            throw new AggregateNotFoundException("No aggregates found");
+        }
+        return aggregates.stream().map(EventModel::getEventData).collect(Collectors.toList());
+    }
 }

@@ -12,9 +12,9 @@ import org.kiroff.bank.cqrs.core.domain.AggregateRoot;
 import java.time.LocalDate;
 
 @NoArgsConstructor
+@Getter
 public class AccountAggregate extends AggregateRoot {
     private Boolean active;
-    @Getter
     private double balance;
 
     public AccountAggregate(OpenAccountCommand command) {

@@ -5,9 +5,11 @@ import org.kiroff.bank.cqrs.core.domain.AggregateRoot;
 import org.kiroff.bank.cqrs.core.events.BaseEvent;
 import org.kiroff.bank.cqrs.core.handlers.EventSourcingHandler;
 import org.kiroff.bank.cqrs.core.infrastructure.EventStore;
+import org.kiroff.bank.cqrs.core.producers.EventProducer;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -35,11 +37,16 @@ import java.util.logging.Logger;
  */
 @Service
 public class AccountEventSourcingHandler implements EventSourcingHandler<AccountAggregate> {
+
     private static final Logger LOGGER = Logger.getLogger(AccountEventSourcingHandler.class.getName());
+
     private final EventStore eventStore;
 
-    public AccountEventSourcingHandler(EventStore eventStore) {
+    private final EventProducer eventProducer;
+
+    public AccountEventSourcingHandler(EventStore eventStore, EventProducer eventProducer) {
         this.eventStore = eventStore;
+        this.eventProducer = eventProducer;
     }
 
     /**
@@ -77,5 +84,13 @@ public class AccountEventSourcingHandler implements EventSourcingHandler<Account
                     .ifPresentOrElse(aggregate::setVersion, () -> LOGGER.warning("No version found."));
         }
         return aggregate;
+    }
+
+    @Override
+    public void republishEvents() {
+        var events = eventStore.getEventsForAllActiveAggregates();
+        if (events != null && !events.isEmpty()) {
+            events.forEach(ev -> eventProducer.produce(ev.getClass().getSimpleName(), ev));
+        }
     }
 }
