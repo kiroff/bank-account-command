@@ -8,6 +8,7 @@ import org.kiroff.bank.cqrs.core.excpetions.AggregateNotFoundException;
 import org.kiroff.bank.cqrs.core.excpetions.ConcurrencyException;
 import org.kiroff.bank.cqrs.core.infrastructure.EventStore;
 import org.kiroff.bank.cqrs.core.producers.EventProducer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,10 @@ import java.util.stream.StreamSupport;
  */
 @Service
 public class AccountEventStore implements EventStore {
+
+    @Value("${spring.kafka.topic}")
+    private String topic;
+
     final EventStoreRepository eventStoreRepository;
 
     final EventProducer eventProducer;
@@ -64,7 +69,8 @@ public class AccountEventStore implements EventStore {
                         .timeStamp(LocalDateTime.now())
                         .build())
                 .map(eventStoreRepository::save)
-                .forEach(savedEvent -> eventProducer.produce(savedEvent.getEventType(), savedEvent.asEventData()));
+                //.forEach(savedEvent -> eventProducer.produce(savedEvent.getEventType(), savedEvent.asEventData()));
+                .forEach(savedEvent -> eventProducer.produce(topic, savedEvent.asEventData()));
     }
 
     /**

@@ -6,10 +6,10 @@ import org.kiroff.bank.cqrs.core.events.BaseEvent;
 import org.kiroff.bank.cqrs.core.handlers.EventSourcingHandler;
 import org.kiroff.bank.cqrs.core.infrastructure.EventStore;
 import org.kiroff.bank.cqrs.core.producers.EventProducer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -39,6 +39,10 @@ import java.util.logging.Logger;
 public class AccountEventSourcingHandler implements EventSourcingHandler<AccountAggregate> {
 
     private static final Logger LOGGER = Logger.getLogger(AccountEventSourcingHandler.class.getName());
+
+
+    @Value("${spring.kafka.topic}")
+    private String topic;
 
     private final EventStore eventStore;
 
@@ -90,7 +94,8 @@ public class AccountEventSourcingHandler implements EventSourcingHandler<Account
     public void republishEvents() {
         var events = eventStore.getEventsForAllActiveAggregates();
         if (events != null && !events.isEmpty()) {
-            events.forEach(ev -> eventProducer.produce(ev.getClass().getSimpleName(), ev));
+//            events.forEach(ev -> eventProducer.produce(ev.getClass().getSimpleName(), ev));
+            events.forEach(ev -> eventProducer.produce(topic, ev));
         }
     }
 }
