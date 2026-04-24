@@ -59,12 +59,12 @@ public class AccountEventStore implements EventStore {
                         .aggregateIdentifier(aggregateId)
                         .aggregateType(AccountAggregate.class.getTypeName())
                         .eventType(event.getClass().getSimpleName())
-                        .eventData(event)
+                        .rawEventData(event)
                         .version(version.get())
                         .timeStamp(LocalDateTime.now())
                         .build())
                 .map(eventStoreRepository::save)
-                .forEach(savedEvent -> eventProducer.produce(savedEvent.getEventType(), savedEvent.getEventData()));
+                .forEach(savedEvent -> eventProducer.produce(savedEvent.getEventType(), savedEvent.asEventData()));
     }
 
     /**
@@ -79,7 +79,7 @@ public class AccountEventStore implements EventStore {
     public List<BaseEvent> getEvents(String aggregateId) {
         return Optional.ofNullable(eventStoreRepository.findByAggregateIdentifier(aggregateId))
                 .filter(l -> !l.isEmpty())
-                .map(l -> l.stream().map(EventModel::getEventData).collect(Collectors.toList()))
+                .map(l -> l.stream().map(EventModel::asEventData).collect(Collectors.toList()))
                 .orElseThrow(() -> new AggregateNotFoundException("Incorrect id=" + aggregateId));
     }
 
@@ -91,6 +91,6 @@ public class AccountEventStore implements EventStore {
         if(aggregates.isEmpty()) {
             throw new AggregateNotFoundException("No aggregates found");
         }
-        return aggregates.stream().map(EventModel::getEventData).collect(Collectors.toList());
+        return aggregates.stream().map(EventModel::asEventData).collect(Collectors.toList());
     }
 }
