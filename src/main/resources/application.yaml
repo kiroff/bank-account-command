@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: bank_account_command
+  main:
+    banner-mode: off
+
   kafka:
     bootstrap-servers: host.docker.internal:9092,host.docker.internal:9094,host.docker.internal:9096
     producer:
